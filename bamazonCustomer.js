@@ -25,43 +25,49 @@ function listItems() {
     for (var i = 0; i < res.length; i++) {
       console.log("ID: " + res[i].id + "; Product: " + res[i].product_name + "; Department: " + res[i].department_name + "; Price: $" + res[i].price + "; Quantity Available: " + res[i].stock_quantity);
     };
+    chooseItem();
   });
-  chooseItem();
 };
 
 listItems();
 
 function chooseItem() {
-  inquirer.prompt({
-    name: "item",
-    type: "input",
-    message: "Enter the ID of the item you would like to purchase."
-  },
-  {
-    name: "quantity",
-    type: "input",
-    message: "How many would you like to order?",
-    validate: function (value){
-      if (isNAN(value) === false) {
-        return true;
-      }
-      else {
-        return false;
+  inquirer.prompt(
+    {
+      name: "item",
+      type: "input",
+      message: "Enter the ID of the item you would like to purchase."
+    },
+    {
+      name: "quantity",
+      type: "input",
+      message: "How many would you like to order?",
+      validate: function (value) {
+        if (isNAN(value) === false) {
+          return true;
+        }
+        else {
+          return false;
+        };
       }
     }
-  }
-  ).then(function(answer){
-    connection.query("SELECT * FROM products", function (err, res){
+  ).then(function (answer) {
+    connection.query("SELECT * FROM products", function (err, res) {
       if (err) throw err;
       var chosenProduct;
-      for (var i=0; i<res.length; i++) {
-        if(results[i].id === parseInt(answer.item)) {
+      for (var i = 0; i < res.length; i++) {
+        if (results[i].id === parseInt(answer.item)) {
           chosenProduct = results[i];
         };
       };
-
-      connection.query("UPDATE products SET stock_quantity=? WHERE =?", [])
-  
-    })
-  })
-}
+      if ((chosenProduct.stock_quantity - answer.quantity) >= 0) {
+        connection.query("UPDATE products SET stock_quantity=" + chosenProduct.stock_quantity + "-? WHERE" + chosenProduct.id + "=?", [parseInt(answer.quantity), parseInt(answer.item)], function (err, res) {
+          console.log("You successfully purchased " + answer.quantity + " " + chosenProduct.product_name + "(s) for a total cost of $" + chosenProduct.price * answer.quantity);
+        });
+      }
+      else {
+        console.log("There is not enough of that item in stock.");
+      };
+    });
+  });
+};
