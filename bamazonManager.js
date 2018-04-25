@@ -43,7 +43,7 @@ function whatToDo() {
                 break;
 
             case "Add New Product":
-
+                addNew();
         }
     });
 };
@@ -101,9 +101,57 @@ function addInventory() {
             connection.query("UPDATE products SET stock_quantity=? WHERE id=?", [updatedQuantity, answer.item], function (err, res) {
                 if (err) throw err;
                 else {
-                  console.log("You successfully added " + answer.add + " " + chosenProduct.product_name + "(s). The new stock quantity is " + chosenProduct.stock_quantity + ".");
+                    console.log("You successfully added " + answer.add + " " + chosenProduct.product_name + "(s). The new stock quantity is " + chosenProduct.stock_quantity + ".");
                 };
-              });
+            });
+        });
+    });
+};
+
+function addNew() {
+    inquirer.prompt([
+        {
+            name: "product",
+            type: "input",
+            message: "What is the name of the product you would like to add?"
+        },
+        {
+            name: "department",
+            type: "input",
+            message: "What department should the product go in?"
+        },
+        {
+            name: "price",
+            type: "input",
+            message: "What is the price of the item?",
+            validate: function (value) {
+                if (isNaN(value) === false) {
+                    return true;
+                }
+                else {
+                    return false;
+                };
+            }
+        },
+        {
+            name: "quantity",
+            type: "input",
+            message: "How many would you like to add to the stock?",
+            validate: function (value) {
+                if (isNaN(value) === false) {
+                    return true;
+                }
+                else {
+                    return false;
+                };
+            }
+        }
+    ]).then(function(answer){
+        connection.query("INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES ?", [answer.product, answer.department, answer.price, answer.quantity], function (err, res){
+            if (err) throw err;
+            else {
+                console.log("You're product has been added!");
+            };
         });
     });
 };
