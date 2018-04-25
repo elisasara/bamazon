@@ -1,5 +1,3 @@
-// import { F_OK } from "constants";
-
 // require("dotenv").config();
 var mysql = require("mysql");
 var inquirer = require("inquirer");
@@ -16,8 +14,6 @@ var connection = mysql.createConnection({
   password: "Sdt#12887",
   database: "bamazon"
 });
-
-console.log("bamazon is running!");
 
 function listItems() {
   connection.query("SELECT * FROM products", function (err, res) {
