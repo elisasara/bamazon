@@ -32,7 +32,7 @@ function listItems() {
 listItems();
 
 function chooseItem() {
-  inquirer.prompt(
+  inquirer.prompt([
     {
       name: "item",
       type: "input",
@@ -43,7 +43,7 @@ function chooseItem() {
       type: "input",
       message: "How many would you like to order?",
       validate: function (value) {
-        if (isNAN(value) === false) {
+        if (isNaN(value) === false) {
           return true;
         }
         else {
@@ -51,23 +51,49 @@ function chooseItem() {
         };
       }
     }
-  ).then(function (answer) {
+  ]).then(function (answer) {
+    console.log(answer);
     connection.query("SELECT * FROM products", function (err, res) {
       if (err) throw err;
-      var chosenProduct;
+      var chosenProduct = "";
       for (var i = 0; i < res.length; i++) {
-        if (results[i].id === parseInt(answer.item)) {
-          chosenProduct = results[i];
+        if (res[i].id === parseInt(answer.item)) {
+          chosenProduct = res[i];
         };
       };
-      if ((chosenProduct.stock_quantity - answer.quantity) >= 0) {
-        connection.query("UPDATE products SET stock_quantity=" + chosenProduct.stock_quantity + "-? WHERE" + chosenProduct.id + "=?", [parseInt(answer.quantity), parseInt(answer.item)], function (err, res) {
-          console.log("You successfully purchased " + answer.quantity + " " + chosenProduct.product_name + "(s) for a total cost of $" + chosenProduct.price * answer.quantity);
+      console.log(chosenProduct);
+      var newQuantity = chosenProduct.stock_quantity - parseInt(answer.quantity);
+      console.log("New Quantity: " + newQuantity);
+      if (newQuantity >= 0) {
+        connection.query("UPDATE products SET stock_quantity=? WHERE id=?", [newQuantity, answer.item], function (err, res) {
+          if (err) throw err;
+          else {
+            console.log("You successfully purchased " + answer.quantity + " " + chosenProduct.product_name + "(s) for a total cost of $" + chosenProduct.price * answer.quantity);
+            buyAnother();
+          }
         });
       }
       else {
         console.log("There is not enough of that item in stock.");
+        buyAnother();
       };
     });
+  });
+};
+
+function buyAnother() {
+  inquirer.prompt([
+    {
+      name: "again",
+      type: "confirm",
+      message: "Do you want to purchase another item?"
+    }
+  ]).then(function (answer) {
+    if (answer.again) {
+      listItems();
+    }
+    else {
+      console.log("Thank you for shopping with Bamazon!");
+    };
   });
 };
