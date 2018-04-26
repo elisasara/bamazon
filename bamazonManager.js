@@ -56,16 +56,27 @@ function forSale() {
         for (var i = 0; i < res.length; i++) {
             console.log("ID: " + res[i].id + "; Product: " + res[i].product_name + "; Department: " + res[i].department_name + "; Price: $" + res[i].price + "; Quantity Available: " + res[i].stock_quantity);
         };
+        nextToDo();
     });
 };
 
 function lowInventory() {
-    connection.query("SELECT * FROM products WHERE stock_quantity <= 5", function (err, res) {
+    connection.query("SELECT COUNT (id) AS count FROM products WHERE stock_quantity <=5", function (err, res){
         if (err) throw err;
-        for (var i = 0; i < res.length; i++) {
-            console.log("ID: " + res[i].id + "; Product: " + res[i].product_name + "; Department: " + res[i].department_name + "; Price: $" + res[i].price + "; Quantity Available: " + res[i].stock_quantity);
-        };
-    });
+        if (res[0].count === 0) {
+            console.log("There are no items with low inventory.");
+            nextToDo();
+        }
+        else {
+            connection.query("SELECT * FROM products WHERE stock_quantity <= 5", function (err, res) {
+                if (err) throw err;
+                for (var i = 0; i < res.length; i++) {
+                    console.log("ID: " + res[i].id + "; Product: " + res[i].product_name + "; Department: " + res[i].department_name + "; Price: $" + res[i].price + "; Quantity Available: " + res[i].stock_quantity);
+                };
+                nextToDo();
+            });        
+        }
+    })
 };
 
 function addInventory() {
@@ -101,7 +112,8 @@ function addInventory() {
             connection.query("UPDATE products SET stock_quantity=? WHERE id=?", [updatedQuantity, answer.item], function (err, res) {
                 if (err) throw err;
                 else {
-                    console.log("You successfully added " + answer.add + " " + chosenProduct.product_name + "(s). The new stock quantity is " + chosenProduct.stock_quantity + ".");
+                    console.log("You successfully added " + answer.add + " " + chosenProduct.product_name + "(s) to the stock.");
+                    nextToDo();
                 };
             });
         });
@@ -151,7 +163,25 @@ function addNew() {
             if (err) throw err;
             else {
                 console.log("You're product has been added!");
+                nextToDo();
             };
         });
+    });
+};
+
+function nextToDo() {
+    inquirer.prompt([
+        {
+            name: "next",
+            type: "confirm",
+            message: "Do you want to perform another action?"
+        }
+    ]).then(function(answer){
+        if (answer.next) {
+            whatToDo();
+        }
+        else {
+            console.log("Have a good day!");
+        };
     });
 };
