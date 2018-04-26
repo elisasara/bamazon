@@ -147,7 +147,7 @@ function addNew() {
             }
         }
     ]).then(function(answer){
-        connection.query("INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES ?", [answer.product, answer.department, answer.price, answer.quantity], function (err, res){
+        connection.query("INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES (?)", [[answer.product, answer.department, answer.price, answer.quantity]], function (err, res){
             if (err) throw err;
             else {
                 console.log("You're product has been added!");
