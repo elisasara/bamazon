@@ -59,10 +59,10 @@ function chooseItem() {
       };
       console.log(chosenProduct);
       var inStock = chosenProduct.stock_quantity - parseInt(answer.quantity);
-      var sold = chosenProduct.product_sales + answer.quantity;
+      var updatedGrossSales = chosenProduct.product_sales + (answer.quantity * chosenProduct.price);
       console.log("New Quantity: " + inStock);
       if (inStock >= 0) {
-        connection.query("UPDATE products SET stock_quantity=?, product_sales=? WHERE id=?", [inStock, sold, answer.item], function (err, res) {
+        connection.query("UPDATE products SET stock_quantity=?, product_sales=? WHERE id=?", [inStock, updatedGrossSales, answer.item], function (err, res) {
           if (err) throw err;
           else {
             console.log("You successfully purchased " + answer.quantity + " " + chosenProduct.product_name + "(s) for a total cost of $" + chosenProduct.price * answer.quantity);
