@@ -47,7 +47,6 @@ function chooseItem() {
       }
     }
   ]).then(function (answer) {
-    console.log(answer);
     connection.query("SELECT * FROM products", function (err, res) {
       if (err) throw err;
       var chosenProduct = "";
@@ -56,10 +55,8 @@ function chooseItem() {
           chosenProduct = res[i];
         };
       };
-      console.log(chosenProduct);
       var inStock = chosenProduct.stock_quantity - parseInt(answer.quantity);
       var updatedGrossSales = chosenProduct.product_sales + (answer.quantity * chosenProduct.price);
-      console.log("New Quantity: " + inStock);
 
       // check to make sure there is enough of that item in stock
       if (inStock >= 0) {

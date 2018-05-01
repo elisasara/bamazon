@@ -51,14 +51,17 @@ function salesByDept() {
                 colWidths: [15, 18, 18, 15, 15]
             });
     // TODO: CREATE LOGIC TO REMOVE DUPLICATE ROWS
-
+            var deptArr = [];
             for (var i = 0; i < res.length; i++) {
                 if (res[i].product_sales === null) {
                     res[i].product_sales = 0.00;
                 }
-                var totalProfit = res[i].product_sales - res[i].over_head_costs;
-
-                table.push([res[i].department_id, res[i].department_name, res[i].over_head_costs, res[i].product_sales, totalProfit]);
+                if (deptArr.indexOf(res[i].department_id)<0){
+                    deptArr.push(res[i].department_id);
+                    var totalProfit = res[i].product_sales - res[i].over_head_costs;
+    
+                    table.push([res[i].department_id, res[i].department_name, res[i].over_head_costs, res[i].product_sales, totalProfit]);     
+                }
             };
             console.log(table.toString());
             nextToDo();
@@ -103,7 +106,7 @@ function newDept() {
     });
 };
 
-// function to see what is next
+// function to see what is next 
 function nextToDo() {
     inquirer.prompt([
         {
