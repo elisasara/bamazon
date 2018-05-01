@@ -1,20 +1,18 @@
-// require("dotenv").config();
+require("dotenv").config();
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-// var keys = require("./keys.js");
 
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
 
-    // Your username
     user: "root",
 
-    // Your password
-    password: "Sdt#12887",
+    password: process.env.MySQL_Database_Password,
     database: "bamazon"
 });
 
+// function to start program
 function whatToDo() {
     inquirer.prompt([
         {
@@ -50,6 +48,7 @@ function whatToDo() {
 
 whatToDo();
 
+// function to see all items for sale
 function forSale() {
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
@@ -60,8 +59,9 @@ function forSale() {
     });
 };
 
+// function to check for all items with inventory lower than 5
 function lowInventory() {
-    connection.query("SELECT COUNT (id) AS count FROM products WHERE stock_quantity <=5", function (err, res){
+    connection.query("SELECT COUNT (id) AS count FROM products WHERE stock_quantity <=5", function (err, res) {
         if (err) throw err;
         if (res[0].count === 0) {
             console.log("There are no items with low inventory.");
@@ -74,11 +74,12 @@ function lowInventory() {
                     console.log("ID: " + res[i].id + "; Product: " + res[i].product_name + "; Department: " + res[i].department_name + "; Price: $" + res[i].price + "; Quantity Available: " + res[i].stock_quantity);
                 };
                 nextToDo();
-            });        
+            });
         }
     })
 };
 
+// function to add inventory to the stock
 function addInventory() {
     inquirer.prompt([
         {
@@ -120,6 +121,7 @@ function addInventory() {
     });
 };
 
+// function to add a new product for sale
 function addNew() {
     inquirer.prompt([
         {
@@ -158,12 +160,27 @@ function addNew() {
                 };
             }
         }
-    ]).then(function(answer){
-        connection.query("INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES (?)", [[answer.product, answer.department, answer.price, answer.quantity]], function (err, res){
+    ]).then(function (answer) {
+        connection.query("SELECT * FROM products", function (err, res) {
             if (err) throw err;
             else {
-                console.log("You're product has been added!");
-                nextToDo();
+                for (var i = 0; i < res.length; i++) {
+                    // check to make sure the product does not already exist
+                    if (res[i].product_name === answer.product && res[i].department_name === answer.department) {
+                        console.log("That item already exists. Please try again.");
+                        nextToDo();
+                        return false;
+                    };
+                };
+
+                // if it is not already in the database add it
+                connection.query("INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES (?)", [[answer.product, answer.department, answer.price, answer.quantity]], function (err, res) {
+                    if (err) throw err;
+                    else {
+                        console.log("You're product has been added!");
+                        nextToDo();
+                    };
+                });
             };
         });
     });
@@ -176,7 +193,7 @@ function nextToDo() {
             type: "confirm",
             message: "Do you want to perform another action?"
         }
-    ]).then(function(answer){
+    ]).then(function (answer) {
         if (answer.next) {
             whatToDo();
         }

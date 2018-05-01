@@ -1,20 +1,18 @@
 require("dotenv").config();
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-// var keys = require("./keys.js");
 
 var connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
 
-  // Your username
   user: "root",
 
-  // Your password
   password: process.env.MySQL_Database_Password,
   database: "bamazon"
 });
 
+// function to start program
 function listItems() {
   connection.query("SELECT * FROM products", function (err, res) {
     if (err) throw err;
@@ -27,6 +25,7 @@ function listItems() {
 
 listItems();
 
+// function to choose item to purchase
 function chooseItem() {
   inquirer.prompt([
     {
@@ -61,6 +60,8 @@ function chooseItem() {
       var inStock = chosenProduct.stock_quantity - parseInt(answer.quantity);
       var updatedGrossSales = chosenProduct.product_sales + (answer.quantity * chosenProduct.price);
       console.log("New Quantity: " + inStock);
+
+      // check to make sure there is enough of that item in stock
       if (inStock >= 0) {
         connection.query("UPDATE products SET stock_quantity=?, product_sales=? WHERE id=?", [inStock, updatedGrossSales, answer.item], function (err, res) {
           if (err) throw err;
@@ -78,6 +79,7 @@ function chooseItem() {
   });
 };
 
+// function to buy another product after having already purchased one
 function buyAnother() {
   inquirer.prompt([
     {

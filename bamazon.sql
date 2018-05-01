@@ -41,7 +41,7 @@ SET department_name = "Childrens"
 WHERE id=3;
 
 ALTER TABLE products
-MODIFY COLUMN product_sales DECIMAL(10,2) NOT NULL;
+MODIFY COLUMN product_sales DECIMAL(10,2);
 
 UPDATE products
 SET product_sales=0;
