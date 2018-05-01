@@ -1,4 +1,4 @@
-// require("dotenv").config();
+require("dotenv").config();
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 // var keys = require("./keys.js");
@@ -11,7 +11,7 @@ var connection = mysql.createConnection({
   user: "root",
 
   // Your password
-  password: "Sdt#12887",
+  password: process.env.MySQL_Database_Password,
   database: "bamazon"
 });
 
@@ -58,10 +58,11 @@ function chooseItem() {
         };
       };
       console.log(chosenProduct);
-      var newQuantity = chosenProduct.stock_quantity - parseInt(answer.quantity);
-      console.log("New Quantity: " + newQuantity);
-      if (newQuantity >= 0) {
-        connection.query("UPDATE products SET stock_quantity=? WHERE id=?", [newQuantity, answer.item], function (err, res) {
+      var inStock = chosenProduct.stock_quantity - parseInt(answer.quantity);
+      var sold = chosenProduct.product_sales + answer.quantity;
+      console.log("New Quantity: " + inStock);
+      if (inStock >= 0) {
+        connection.query("UPDATE products SET stock_quantity=?, product_sales=? WHERE id=?", [inStock, sold, answer.item], function (err, res) {
           if (err) throw err;
           else {
             console.log("You successfully purchased " + answer.quantity + " " + chosenProduct.product_name + "(s) for a total cost of $" + chosenProduct.price * answer.quantity);
